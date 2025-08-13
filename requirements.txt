@@ -1,1 +1,4 @@
 telethon
+flask
+psutil
+requests
