@@ -5,7 +5,57 @@ import json
 import asyncio
 from datetime import datetime
 from telethon import TelegramClient, events, Button, errors
+from flask import Flask
+import threading
 
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "البوت شغال ✅"
+
+def run():
+    app.run(host='0.0.0.0', port=8080)
+
+def keep_alive():
+    t = threading.Thread(target=run)
+    t.start()
+import platform, psutil, socket, time, requests, os
+
+@j_f_v.on(events.NewMessage(pattern='/ping'))
+async def ping_command(event):
+    if event.sender_id != story_admin_id:
+        return
+    
+    start_time = time.time()
+    await event.respond("🏓 جارِ الفحص...")
+    latency = round((time.time() - start_time) * 1000)
+
+    # معلومات النظام
+    os_info = f"{platform.system()} {platform.release()} ({platform.machine()})"
+    uptime_seconds = time.time() - psutil.boot_time()
+    uptime_str = time.strftime("%H:%M:%S", time.gmtime(uptime_seconds))
+    cpu_percent = psutil.cpu_percent()
+    ram_percent = psutil.virtual_memory().percent
+
+    # IPs
+    local_ip = socket.gethostbyname(socket.gethostname())
+    try:
+        public_ip = requests.get("https://api.ipify.org").text
+    except:
+        public_ip = "غير متاح"
+
+    msg = (
+        f"🏓 **سرعة الاستجابة:** {latency} ms\n"
+        f"🌐 **IP الداخلي:** {local_ip}\n"
+        f"🌍 **IP الخارجي:** {public_ip}\n"
+        f"💻 **النظام:** {os_info}\n"
+        f"📆 **مدة التشغيل:** {uptime_str}\n"
+        f"🖥 **المعالج:** {cpu_percent}%\n"
+        f"🧠 **الذاكرة:** {ram_percent}%"
+    )
+
+    await event.respond(msg)    
 # === إعدادات المبرمج: عدِّل القيم التالية قبل التشغيل ===
 api_id = '20067911'
 api_hash = 'ef381695bc379545f9115a282be721c2'
@@ -774,6 +824,6 @@ def handle_exit(sig, frame):
 
 signal.signal(signal.SIGINT, handle_exit)
 signal.signal(signal.SIGTERM, handle_exit)
-
+keep_alive()
 print('البوت شغال ✓')
 j_f_v.run_until_disconnected()
